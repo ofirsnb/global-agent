@@ -1,8 +1,14 @@
 {
-  "author": {
-    "email": "gajus@gajus.com",
-    "name": "Gajus Kuizinas",
-    "url": "http://gajus.com"
+  "version": "4.0.0",
+  "name": "@ofirsnb/global-agent",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ofirsnb/global-agent"
+  },
+  "scripts": {
+    "build": "del-cli ./dist && tsc",
+    "lint": "eslint ./src ./test && tsc",
+    "test": "ava --verbose --serial"
   },
   "ava": {
     "extensions": [
@@ -25,7 +31,7 @@
     "semver": "^7.3.5",
     "serialize-error": "^8.1.0"
   },
-  "description": "Global HTTP/HTTPS proxy configurable using environment variables.",
+  "description": "Global HTTP/HTTPS proxy configurable using environment variables. (Fork)",
   "devDependencies": {
     "@ava/babel": "^2.0.0",
     "@babel/cli": "^7.14.8",
@@ -61,7 +67,7 @@
     "typescript": "^4.3.5"
   },
   "engines": {
-    "node": ">=10.0"
+    "node": ">=16.0"
   },
   "husky": {
     "hooks": {
@@ -76,21 +82,23 @@
   ],
   "license": "BSD-3-Clause",
   "main": "./dist/index.js",
-  "name": "global-agent",
+  "files": [
+    "dist/",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "CHANGELOG.md",
+    "bootstrap.js"
+  ],
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
     "all": true
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/gajus/global-agent"
+  "typings": "./dist/index.d.ts",
+  "author": {
+    "email": "ofirsnb@ofirsnb.com",
+    "name": "ofirsnb",
+    "url": "https://github.com/ofirsnb"
   },
-  "scripts": {
-    "build": "del-cli ./dist && tsc",
-    "lint": "eslint ./src ./test && tsc",
-    "test": "ava --verbose --serial",
-    "create-readme": "gitdown ./.README/README.md --output-file ./README.md"
-  },
-  "typings": "./dist/src/index.d.ts",
-  "version": "0.0.0-development"
+  "homepage": "https://github.com/ofirsnb/global-agent"
 }

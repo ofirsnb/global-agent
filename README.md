@@ -1,13 +1,13 @@
-# global-agent
+# @ofirsnb/global-agent
 
-[![Travis build status](http://img.shields.io/travis/gajus/global-agent/master.svg?style=flat-square)](https://travis-ci.org/gajus/global-agent)
-[![Coveralls](https://img.shields.io/coveralls/gajus/global-agent.svg?style=flat-square)](https://coveralls.io/github/gajus/global-agent)
-[![NPM version](http://img.shields.io/npm/v/global-agent.svg?style=flat-square)](https://www.npmjs.org/package/global-agent)
-[![Canonical Code Style](https://img.shields.io/badge/code%20style-canonical-blue.svg?style=flat-square)](https://github.com/gajus/canonical)
-[![Twitter Follow](https://img.shields.io/twitter/follow/kuizinas.svg?style=social&label=Follow)](https://twitter.com/kuizinas)
+[![NPM version](http://img.shields.io/npm/v/@ofirsnb/global-agent.svg?style=flat-square)](https://www.npmjs.org/package/@ofirsnb/global-agent)
+[![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat-square)](https://github.com/ofirsnb/global-agent/blob/master/LICENSE)
+
+fork of [global-agent](https://github.com/gajus/global-agent) to improve its capabilities.
 
 Global HTTP/HTTPS proxy configurable using environment variables.
 
+* [Installation](#installation)
 * [Usage](#usage)
   * [Setup proxy using `global-agent/bootstrap`](#setup-proxy-using-global-agentbootstrap)
   * [Setup proxy using `bootstrap` routine](#setup-proxy-using-bootstrap-routine)
@@ -23,6 +23,9 @@ Global HTTP/HTTPS proxy configurable using environment variables.
   * [What is the reason `global-agent` overrides explicitly configured HTTP(S) agent?](#what-is-the-reason-global-agent-overrides-explicitly-configured-https-agent)
   * [What is the reason `global-agent/bootstrap` does not use `HTTP_PROXY`?](#what-is-the-reason-global-agentbootstrap-does-not-use-http_proxy)
   * [What is the difference from `global-tunnel` and `tunnel`?](#what-is-the-difference-from-global-tunnel-and-tunnel)
+
+## Installation
+`npm i @ofirsnb/global-agent`
 
 ## Usage
 
@@ -128,6 +131,22 @@ The first HTTP request is going to use http://127.0.0.1:8001 proxy and the secon
 
 All `global-agent` configuration is available under `global.GLOBAL_AGENT` namespace.
 
+### Passing custom Agent along with the request
+```js
+import axios from 'axios';
+import { Agent } from 'node:https';
+
+const httpsAgent = new Agent({
+  rejectUnauthorized: false,
+  maxFreeSockets: 128,
+  timeout: 100,
+});
+axios.get('https://127.0.0.1:8000', {
+  httpsAgent,
+});
+```
+
+The request will be proxied (if applicable) while maintaining the custom agent configuration.
 ### Exclude URLs
 
 The `GLOBAL_AGENT_NO_PROXY` environment variable specifies a pattern of URLs that should be excluded from proxying. `GLOBAL_AGENT_NO_PROXY` value is a comma-separated list of domain names. Asterisks can be used as wildcards, e.g.
@@ -210,13 +229,10 @@ type ProxyAgentConfigurationInputType = {|
 * [`axios`](https://www.npmjs.com/package/axios)
 * [`request`](https://www.npmjs.com/package/request)
 
+`global-agent` supports Node.js v16 and above, and does not implements workarounds for the older Node.js versions. 
+
+
 ## FAQ
-
-### What is the reason `global-agent` overrides explicitly configured HTTP(S) agent?
-
-By default, `global-agent` overrides [`agent` property](https://nodejs.org/api/http.html#http_http_request_options_callback) of any HTTP request, even if `agent` property was explicitly set when constructing a HTTP request. This behaviour allows to intercept requests of libraries that use a custom instance of an agent per default (e.g. Stripe SDK [uses an `http(s).globalAgent` instance pre-configured with `keepAlive: true`](https://github.com/stripe/stripe-node/blob/e542902dd8fbe591fe3c3ce07a7e89d1d60e4cf7/lib/StripeResource.js#L11-L12)).
-
-This behaviour can be disabled with `GLOBAL_AGENT_FORCE_GLOBAL_AGENT=false` environment variable. When disabled, then `global-agent` will only set `agent` property when it is not already defined or if `agent` is an instance of `http(s).globalAgent`.
 
 ### What is the reason `global-agent/bootstrap` does not use `HTTP_PROXY`?
 
@@ -231,8 +247,3 @@ $ export GLOBAL_AGENT_ENVIRONMENT_VARIABLE_NAMESPACE=
 
 Now script initialized using `global-agent/bootstrap` will use `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables.
 
-### What is the difference from `global-tunnel` and `tunnel`?
-
-[`global-tunnel`](https://github.com/salesforce/global-tunnel) (including [`global-tunnel-ng`](https://github.com/np-maintain/global-tunnel) and [`tunnel`](https://npmjs.com/package/tunnel)) are designed to support legacy Node.js versions. They use various [workarounds](https://github.com/koichik/node-tunnel/blob/5fb2fb424788597146b7be6729006cad1cf9e9a8/lib/tunnel.js#L134-L144) and rely on [monkey-patching `http.request`, `http.get`, `https.request` and `https.get` methods](https://github.com/np-maintain/global-tunnel/blob/51413dcf0534252b5049ec213105c7063ccc6367/index.js#L302-L338).
-
-In contrast, `global-agent` supports Node.js v10 and above, and does not implements workarounds for the older Node.js versions.
