@@ -3,7 +3,7 @@
   "name": "@ofirsnb/global-agent",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ofirsnb/global-agent"
+    "url": "git+https://github.com/ofirsnb/global-agent.git"
   },
   "scripts": {
     "build": "del-cli ./dist && tsc",
