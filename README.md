@@ -134,6 +134,11 @@ All `@ofirsnb/global-agent` configuration is available under `global.GLOBAL_AGEN
 ```js
 import axios from 'axios';
 import { Agent } from 'node:https';
+import {
+  bootstrap
+} from '@ofirsnb/global-agent';
+
+bootstrap({ forceGlobalAgent: false });
 
 const httpsAgent = new Agent({
   rejectUnauthorized: false,
@@ -144,8 +149,8 @@ axios.get('https://127.0.0.1:8000', {
   httpsAgent,
 });
 ```
+The request will be proxied (if applicable) while maintaining the custom agent configuration. Must be configured with `forceGlobalAgent: false`.
 
-The request will be proxied (if applicable) while maintaining the custom agent configuration.
 ### Exclude URLs
 
 The `GLOBAL_AGENT_NO_PROXY` environment variable specifies a pattern of URLs that should be excluded from proxying. `GLOBAL_AGENT_NO_PROXY` value is a comma-separated list of domain names. Asterisks can be used as wildcards, e.g.
