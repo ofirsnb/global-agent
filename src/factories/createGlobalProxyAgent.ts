@@ -144,24 +144,23 @@ export default (configurationInput: ProxyAgentConfigurationInputType = defaultCo
 
   // Overriding globalAgent was added in v11.7.
   // @see https://nodejs.org/uk/blog/release/v11.7.0/
-  if (semver.gte(process.version, 'v11.7.0')) {
+  if (semver.gte(process.version, 'v16.0.0')) {
     // @see https://github.com/facebook/flow/issues/7670
     // @ts-expect-error Node.js version compatibility
     http.globalAgent = httpAgent;
 
     // @ts-expect-error Node.js version compatibility
     https.globalAgent = httpsAgent;
-  }
 
-  // The reason this logic is used in addition to overriding http(s).globalAgent
-  // is because there is no guarantee that we set http(s).globalAgent variable
-  // before an instance of http(s).Agent has been already constructed by someone,
-  // e.g. Stripe SDK creates instances of http(s).Agent at the top-level.
-  // @see https://github.com/gajus/global-agent/pull/13
-  //
-  // We still want to override http(s).globalAgent when possible to enable logic
-  // in `bindHttpMethod`.
-  if (semver.gte(process.version, 'v10.0.0')) {
+    // The reason this logic is used in addition to overriding http(s).globalAgent
+    // is because there is no guarantee that we set http(s).globalAgent variable
+    // before an instance of http(s).Agent has been already constructed by someone,
+    // e.g. Stripe SDK creates instances of http(s).Agent at the top-level.
+    // @see https://github.com/gajus/global-agent/pull/13
+    //
+    // We still want to override http(s).globalAgent when possible to enable logic
+    // in `bindHttpMethod`.
+
     // @ts-expect-error seems like we are using wrong type for httpAgent
     http.get = bindHttpMethod(httpGet, httpAgent, configuration.forceGlobalAgent);
 
