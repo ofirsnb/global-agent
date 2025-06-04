@@ -20,9 +20,7 @@ Global HTTP/HTTPS proxy configurable using environment variables.
   * [`global.GLOBAL_AGENT`](#globalglobal_agent)
 * [Supported libraries](#supported-libraries)
 * [FAQ](#faq)
-  * [What is the reason `global-agent` overrides explicitly configured HTTP(S) agent?](#what-is-the-reason-global-agent-overrides-explicitly-configured-https-agent)
   * [What is the reason `global-agent/bootstrap` does not use `HTTP_PROXY`?](#what-is-the-reason-global-agentbootstrap-does-not-use-http_proxy)
-  * [What is the difference from `global-tunnel` and `tunnel`?](#what-is-the-difference-from-global-tunnel-and-tunnel)
 
 ## Installation
 `npm i @ofirsnb/global-agent`
@@ -85,8 +83,8 @@ import globalTunnel from 'global-tunnel-ng';
 
 const MAJOR_NODEJS_VERSION = parseInt(process.version.slice(1).split('.')[0], 10);
 
-if (MAJOR_NODEJS_VERSION >= 10) {
-  // `global-agent` works with Node.js v10 and above.
+if (MAJOR_NODEJS_VERSION >= 16) {
+  // `global-agent` works with Node.js v16 and above.
   bootstrap();
 } else {
   // `global-tunnel-ng` works only with Node.js v10 and below.
