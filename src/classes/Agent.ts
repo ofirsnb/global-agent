@@ -77,6 +77,7 @@ abstract class Agent {
 
   public abstract createConnection (configuration: ConnectionConfigurationType, callback: ConnectionCallbackType): void;
 
+  // eslint-disable-next-line complexity
   public addRequest (request: http.ClientRequest, configuration: RequestOptions) {
     let requestUrl;
 
@@ -87,7 +88,20 @@ abstract class Agent {
     if (request.path.startsWith('http://') ?? request.path.startsWith('https://')) {
       requestUrl = request.path;
     } else {
-      requestUrl = this.protocol + '//' + (configuration.hostname ?? configuration.host) + (configuration.port === 80 || configuration.port === 443 ? '' : ':' + configuration.port) + request.path;
+      const portSuffix = configuration.port === 80 || configuration.port === 443 ? '' : `:${configuration.port}`;
+      requestUrl = `${this.protocol}//${configuration.hostname ?? configuration.host}${portSuffix}${request.path}`;
+    }
+
+    const currentRequestAgent = (request as any).agent;
+    if (currentRequestAgent && (currentRequestAgent.noProxy === true || currentRequestAgent.options?.noProxy === true)) {
+      log.trace({
+        destination: requestUrl,
+      }, 'bypassing proxy; agent.noProxy is true');
+
+      // @ts-expect-error seems like we are using wrong type for fallbackAgent.
+      this.fallbackAgent.addRequest(request, configuration);
+
+      return;
     }
 
     if (!this.isProxyConfigured()) {
@@ -120,13 +134,13 @@ abstract class Agent {
       request.path = requestUrl;
 
       if (proxy.authorization) {
-        request.setHeader('proxy-authorization', 'Basic ' + Buffer.from(proxy.authorization).toString('base64'));
+        request.setHeader('proxy-authorization', `Basic ${Buffer.from(proxy.authorization).toString('base64')}`);
       }
     }
 
     log.trace({
       destination: requestUrl,
-      proxy: 'http://' + proxy.hostname + ':' + proxy.port,
+      proxy: `http://${proxy.hostname}:${proxy.port}`,
       requestId: currentRequestId,
     }, 'proxying request');
 

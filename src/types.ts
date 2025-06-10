@@ -1,8 +1,10 @@
 import type {
   Agent as HttpAgent,
+  AgentOptions as HttpAgentOptions,
 } from 'http';
 import type {
   Agent as HttpsAgent,
+  AgentOptions as HttpsAgentOptions,
 } from 'https';
 import type {
   Socket,
@@ -62,3 +64,22 @@ export type ProxyAgentConfigurationType = {
   forceGlobalAgent: boolean,
   socketConnectionTimeout: number,
 };
+
+type CustomAgentOptions = {
+  noProxy?: boolean,
+};
+
+export type ExtendedHttpAgentOptions = CustomAgentOptions & HttpAgentOptions;
+
+export type GlobalAgentHttpAgent = CustomAgentOptions & HttpAgent & {
+  options: ExtendedHttpAgentOptions,
+};
+
+export type ExtendedHttpsAgentOptions = CustomAgentOptions & HttpsAgentOptions;
+
+export type GlobalAgentHttpsAgent = CustomAgentOptions & HttpsAgent & {
+  options: ExtendedHttpsAgentOptions,
+};
+
+export type ExtendedAgentOptions = ExtendedHttpAgentOptions | ExtendedHttpsAgentOptions;
+export type AgentWithNoProxy = GlobalAgentHttpAgent | GlobalAgentHttpsAgent;

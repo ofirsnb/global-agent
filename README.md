@@ -13,6 +13,7 @@ Global HTTP/HTTPS proxy configurable using environment variables.
   * [Setup proxy using `bootstrap` routine](#setup-proxy-using-bootstrap-routine)
   * [Runtime configuration](#runtime-configuration)
   * [Exclude URLs](#exclude-urls)
+  * [Disable Proxy per request basis](#disable-proxy-per-request-basis)
   * [Enable logging](#enable-logging)
 * [API](#api)
   * [`createGlobalProxyAgent`](#createglobalproxyagent)
@@ -161,6 +162,45 @@ export GLOBAL_AGENT_NO_PROXY='*.foo.com,baz.com'
 ```
 
 says to contact all machines with the 'foo.com' TLD and 'baz.com' domains directly.
+
+### Disable Proxy per request basis
+```js
+import axios from 'axios';
+import {
+  bootstrap,
+  createHttpsAgent
+} from '@ofirsnb/global-agent';
+
+bootstrap({ forceGlobalAgent: false });
+
+const httpsAgent = createHttpsAgent({
+  noProxy: true,
+  timeout: 1000,
+});
+axios.get('https://127.0.0.1:8000', {
+  httpsAgent,
+});
+```
+
+Typescript:
+```typescript
+import { createHttpsAgent, createAgent } from '@ofirsnb/global-agent';
+
+const httpAgent = createHttpsAgent({
+  timeout: 8000,
+  rejectUnauthorized: true,
+  noProxy: true,
+});
+
+// Alternate approach:
+const httpAgent = createAgent({
+  timeout: 8000,
+  rejectUnauthorized: true,
+  noProxy: true
+}, 'https');
+```
+using `noProxy: true` the request won't be proxied, while using the given agent.
+
 
 ### Separate proxy for HTTPS
 
