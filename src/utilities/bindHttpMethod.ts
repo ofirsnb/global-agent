@@ -26,6 +26,20 @@ const mergeAgents = (proxyAgent: AgentWithMethods, customAgent: AgentType): Agen
     'freeSockets',
     'totalSocketCount',
 
+    // TLS-related properties that could interfere with proxy certificate validation
+    'checkServerIdentity',
+    'servername',
+    'ca',
+    'cert',
+    'key',
+    'pfx',
+    'passphrase',
+    'ciphers',
+    'secureProtocol',
+    'secureOptions',
+    'sessionIdContext',
+    'maxCachedSessions',
+
     // Prototype-related properties
     'constructor',
     '__proto__',

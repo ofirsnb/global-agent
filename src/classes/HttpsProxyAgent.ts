@@ -43,6 +43,8 @@ class HttpsProxyAgent extends Agent {
     socket.once('data', () => {
       const secureSocket = tls.connect({
         ...configuration.tls,
+        host: configuration.host,
+        port: configuration.port,
         socket,
       });
 

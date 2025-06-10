@@ -36,6 +36,16 @@ type HttpsRequestOptions = AgentRequestOptions & Omit<https.RequestOptions, keyo
 
 type RequestOptions = HttpRequestOptions | HttpsRequestOptions;
 
+// Utility function to check if a string is an IP address
+// RFC 6066 prohibits setting servername to an IP address
+// not using internal `net` module because it's not available in previous versions of Node.js
+const isIpAddress = (host: string): boolean => {
+  const ipvFourPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+  const ipvSixPattern = /^([\dA-Fa-f]{0,4}:){2,7}[\dA-Fa-f]{0,4}$/;
+
+  return ipvFourPattern.test(host) || ipvSixPattern.test(host);
+};
+
 abstract class Agent {
   public defaultPort: number;
 
@@ -77,7 +87,7 @@ abstract class Agent {
     if (request.path.startsWith('http://') ?? request.path.startsWith('https://')) {
       requestUrl = request.path;
     } else {
-      requestUrl = this.protocol + '//' + (configuration.hostname ?? configuration.host) + (configuration.port === 80 ?? configuration.port === 443 ? '' : ':' + configuration.port) + request.path;
+      requestUrl = this.protocol + '//' + (configuration.hostname ?? configuration.host) + (configuration.port === 80 || configuration.port === 443 ? '' : ':' + configuration.port) + request.path;
     }
 
     if (!this.isProxyConfigured()) {
@@ -150,7 +160,31 @@ abstract class Agent {
     // > are also accepted:
     // >   ca, cert, ciphers, clientCertEngine, crl, dhparam, ecdhCurve, honorCipherOrder,
     // >   key, passphrase, pfx, rejectUnauthorized, secureOptions, secureProtocol, servername, sessionIdContext.
-    if (configuration.secureEndpoint) {
+
+    // Detect HTTPS requests when secureEndpoint is not set
+    // Some Node.js versions or request libraries may not set secureEndpoint properly
+    const isHttpsRequest = configuration.secureEndpoint === true ||
+                          configuration.secureEndpoint === undefined &&
+                          this.protocol === 'https:';
+    if (isHttpsRequest) {
+      // Honor rejectUnauthorized from agent when not specified in request options
+      // This allows custom agents with rejectUnauthorized: false to work properly with merging
+      let effectiveRejectUnauthorized = configuration.rejectUnauthorized;
+      if (effectiveRejectUnauthorized === undefined) {
+        // Check if the request's agent has a rejectUnauthorized setting
+        const requestAgent = (request as any).agent;
+        if (requestAgent?.options?.rejectUnauthorized !== undefined) {
+          effectiveRejectUnauthorized = requestAgent.options.rejectUnauthorized;
+        }
+      }
+
+      // Only set servername for hostnames, not IP addresses
+      // RFC 6066 prohibits setting servername to an IP address, which can cause TLS handshake failures
+      let effectiveServername: string | undefined;
+      if (!isIpAddress(connectionConfiguration.host)) {
+        effectiveServername = connectionConfiguration.host;
+      }
+
       connectionConfiguration.tls = {
         ca: configuration.ca,
         cert: configuration.cert,
@@ -163,10 +197,10 @@ abstract class Agent {
         key: configuration.key,
         passphrase: configuration.passphrase,
         pfx: configuration.pfx,
-        rejectUnauthorized: configuration.rejectUnauthorized ?? true,
+        rejectUnauthorized: effectiveRejectUnauthorized,
         secureOptions: configuration.secureOptions,
         secureProtocol: configuration.secureProtocol,
-        servername: configuration.servername ?? connectionConfiguration.host,
+        servername: effectiveServername,
         sessionIdContext: configuration.sessionIdContext,
       };
 
