@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0]
+
+### Feature
+- Introduced `createAgent`, `createHttpAgent` and `createHttpsAgent` methods,  to allow custom global-agent properties per request.   Examples in the [README.md](README.md#disable-proxy-per-request-basis)
+- Introduced `noProxy` custom global-agent property.  In case is `true`,  the request won't be proxied.   Examples in the [README.md](README.md#disable-proxy-per-request-basis)
+
 ## [4.0.6]
 
 ### Fixed
