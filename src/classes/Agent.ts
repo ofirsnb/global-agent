@@ -92,18 +92,6 @@ abstract class Agent {
       requestUrl = `${this.protocol}//${configuration.hostname ?? configuration.host}${portSuffix}${request.path}`;
     }
 
-    const currentRequestAgent = (request as any).agent;
-    if (currentRequestAgent && (currentRequestAgent.noProxy === true || currentRequestAgent.options?.noProxy === true)) {
-      log.trace({
-        destination: requestUrl,
-      }, 'bypassing proxy; agent.noProxy is true');
-
-      // @ts-expect-error seems like we are using wrong type for fallbackAgent.
-      this.fallbackAgent.addRequest(request, configuration);
-
-      return;
-    }
-
     if (!this.isProxyConfigured()) {
       log.trace({
         destination: requestUrl,

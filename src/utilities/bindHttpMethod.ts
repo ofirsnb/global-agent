@@ -1,5 +1,8 @@
 import http from 'http';
 import https from 'https';
+import type {
+  GlobalAgentHttpsAgent,
+} from '../types';
 
 type AgentType = http.Agent | https.Agent;
 
@@ -98,13 +101,17 @@ export default (
       callback = args[1];
     }
 
+    // Check for noProxy before applying proxy logic
+    const hasNoProxy = (options.agent as GlobalAgentHttpsAgent)?.noProxy === true ||
+                      (options.agent as GlobalAgentHttpsAgent)?.options?.noProxy === true;
+
     if (forceGlobalAgent) {
       options.agent = agent;
     } else if (!options.agent) {
       options.agent = agent;
     } else if (options.agent === http.globalAgent || options.agent === https.globalAgent) {
       options.agent = agent;
-    } else {
+    } else if (!hasNoProxy) {
       options.agent = mergeAgents(agent, options.agent);
     }
 
